@@ -1,8 +1,10 @@
 package server
 
 import (
+	"cloud.google.com/go/firestore"
 	"context"
 	"fmt"
+	"github.com/auctionee/auth/pkg/db"
 	"github.com/auctionee/auth/pkg/handlers"
 	"github.com/auctionee/auth/pkg/logger"
 	"github.com/gorilla/mux"
@@ -12,16 +14,16 @@ import (
 )
 
 type AuthServer struct {
-	ctx context.Context
+	Ctx context.Context
 	port string
 	connectionTimeout time.Duration
 }
 
 func NewAuthServer(port int) *AuthServer  {
-
+	ctx := logger.NewCtxWithLogger()
 	return &AuthServer{
 		port: ":"+strconv.Itoa(port),
-		ctx : logger.NewCtxWithLogger(),
+		Ctx : ctx ,
 	}
 }
 func (s *AuthServer) Start(){
@@ -30,10 +32,10 @@ func (s *AuthServer) Start(){
 		fmt.Fprintf(w, "Hello, GCloud!")
 	})
 	postRouter := r.Methods(http.MethodPost).Subrouter()
-	postRouter.Handle("/register/", handlers.LoggerMiddleware(s.ctx, http.HandlerFunc(handlers.RegisterHandler)))
-	postRouter.Handle("/login/", handlers.LoggerMiddleware(s.ctx, http.HandlerFunc(handlers.LoginHandler)))
+	postRouter.Handle("/register/", handlers.LoggerMiddleware(s.Ctx, http.HandlerFunc(handlers.RegisterHandler)))
+	postRouter.Handle("/login/", handlers.LoggerMiddleware(s.Ctx, http.HandlerFunc(handlers.LoginHandler)))
 	if err := http.ListenAndServe(s.port, r); err != nil{
-		logger.GetLogger(s.ctx).Fatal()
+		logger.GetLogger(s.Ctx).Fatal()
 	}
 
 }
