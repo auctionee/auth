@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/auctionee/auth/pkg/handlers"
 	"github.com/auctionee/auth/pkg/logger"
 	"github.com/gorilla/mux"
@@ -25,6 +26,9 @@ func NewAuthServer(port int) *AuthServer  {
 }
 func (s *AuthServer) Start(){
 	r := mux.NewRouter()
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, GCloud!")
+	})
 	postRouter := r.Methods(http.MethodPost).Subrouter()
 	postRouter.Handle("/register/", handlers.LoggerMiddleware(s.ctx, http.HandlerFunc(handlers.RegisterHandler)))
 	postRouter.Handle("/login/", handlers.LoggerMiddleware(s.ctx, http.HandlerFunc(handlers.LoginHandler)))
