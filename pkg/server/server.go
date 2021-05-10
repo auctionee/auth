@@ -1,10 +1,8 @@
 package server
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
 	"fmt"
-	"github.com/auctionee/auth/pkg/db"
 	"github.com/auctionee/auth/pkg/handlers"
 	"github.com/auctionee/auth/pkg/logger"
 	"github.com/gorilla/mux"
