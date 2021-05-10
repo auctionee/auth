@@ -1,24 +1,31 @@
 package handlers
 
 import (
+	"bytes"
 	"cloud.google.com/go/firestore"
 	"encoding/json"
 	"github.com/auctionee/auth/pkg/data"
 	"github.com/auctionee/auth/pkg/db"
 	"github.com/auctionee/auth/pkg/logger"
 	"golang.org/x/crypto/bcrypt"
+	"io"
+	"io/ioutil"
 	"net/http"
 )
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	l := logger.GetLogger(r.Context())
 	creds := &data.Credentials{}
-	err := json.NewDecoder(r.Body).Decode(creds)
+	b := bytes.NewBuffer(make([]byte, 0))
+	reader := io.TeeReader(r.Body, b)
+	err := json.NewDecoder(reader).Decode(creds)
 	if err != nil {
 		l.Fatal("can't read request body")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	defer r.Body.Close()
+	r.Body = ioutil.NopCloser(b)
 	if err := db.IfExist(r.Context(), creds); err != nil {
 		l.Info("user", creds.Login, "found, redirecting to /login")
 		LoginHandler(w,r)
